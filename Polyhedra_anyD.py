@@ -175,7 +175,7 @@ class Polyhedra:
                             break
                     if (used):
                         continue
-                    new_face = Face([i, j, k], self)
+                    new_face = Face([j, i, k], self)
                     #print("based at:", i, j, k)
                     current_point_id = k
                     while (current_point_id != j):
