@@ -107,7 +107,7 @@ class Polyhedra:
             self.faces = []
             return
         self.Construct()
-        print("Polyhedra construction completed; Faces:", len(self.faces))
+        print("Polyhedra construction completed; Faces:", len(self.faces), "Vertices:", len(self.vertices))
 
     def ReadData(self, filename):
         # initialise from input: N [vertice count] -> (a, b, c, ...) [vertices coords, 3 or more] -> M [edge count] -> (a, b) [edge vertices]
@@ -160,6 +160,7 @@ class Polyhedra:
                 except Exception:
                     print("Initialisation failed, bad edge format")
                     return 1
+            infile.close()
         return 0
 
     def Construct(self):
