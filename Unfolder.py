@@ -1,4 +1,4 @@
-from Polyhedra_anyD import *
+from Polyhedra_determined import *
 
 
 class PlanarPoint:
@@ -127,20 +127,28 @@ class Unfolder:
         if (unfolds > self.scan_distsance):
             return
         n = len(self.current_face_points)
+        origin_point = PlanarPoint(0, 0, 0)
+        if (anchors == -1):
+            anchor_ref = 0
+        else:
+            anchor_ref = anchors[2]
         this_iteration_points = [self.current_face_points[i] for i in range(n)]
         for i in range(n):
             ref = this_iteration_points[i - 2]
             a = this_iteration_points[i - 1]
             b = this_iteration_points[i]
             if (anchors != -1):
-                if ((a.pid in anchors) and (a.pid in anchors)):
+                if ((a.pid in anchors[:2]) and (a.pid in anchors[:2])):
                     continue
             if (a.visible or b.visible):
+                if (anchor_ref * origin_point.DistanceViaSegment(a, b) < 0):
+                    continue
                 for face in self.connections[a.pid][b.pid]:
                     if (face == cur_face):
                         continue
+                    anchor_dist = origin_point.DistanceViaSegment(b, a)
                     self.MapFace(face, a, b, ref)
-                    self.TraverseStep([a, b], face, unfolds + 1)
+                    self.TraverseStep([a, b, anchor_dist], face, unfolds + 1)
         return 0
 
     def CompressResults(self):
@@ -161,7 +169,7 @@ class Unfolder:
         self.compressed_invocations = compressed_results
         self.invocations = []
 
-    def TraverseFrom(self, origin_id, times=10):
+    def TraverseFrom(self, origin_id, times=15):
         start_faces = self.PrepTraversal(origin_id, times)
         reference = PlanarPoint(-1, -1, -1)
         for start_face, a, b in start_faces:
