@@ -15,21 +15,22 @@ class Tick:
         self.Precount(origin, max_time, len(polyhedra.vertices))
 
     def MapAround(self, polyhedra):
+        m = len(polyhedra.faces)
         n = len(polyhedra.vertices)
         self.map = [[] for i in range(n)]
-        for face in polyhedra.faces:
-            for other in polyhedra.faces:
-                if (face == other):
-                    continue
-                for a in face.vertice_ids:
-                    for b in face.vertice_ids:
-                        if (a == b):
-                            continue
+        for p in range(m):
+            for q in range(p + 1, m):
+                face = polyhedra.faces[p]
+                other = polyhedra.faces[q]
+                for i in range(len(face.vertice_ids)):
+                    for j in range(i + 1, len(face.vertice_ids)):
+                        a = face.vertice_ids[i]
+                        b = face.vertice_ids[j]
                         if (a in other.vertice_ids and b in other.vertice_ids):
                             aid = face.vertice_ids.index(a)
                             bid = face.vertice_ids.index(b)
-                            self.map[a].append([b, face.distances[aid][bid]])
-                            self.map[b].append([a, face.distances[aid][bid]])
+                            self.map[a].append([b, round(face.distances[aid][bid], 3)])
+                            self.map[b].append([a, round(face.distances[aid][bid], 3)])
 
     def NewEvent(self, past, event):
         for e in past:
@@ -52,9 +53,9 @@ class Tick:
                 self.unique_states.append([unified_state[i] for i in range(n)])
                 timed_calls = []
                 timer += 1
-                print("timer inc:", timer)
             state[v] += 1
             if (self.NewEvent(timed_calls, event)):
+                timed_calls.append(event)
                 unified_state[v] += 1
                 for elem in self.map[v]:
                     u, dist = elem
@@ -64,7 +65,7 @@ class Tick:
 
 
 class WaveSim:
-    def __init__(self, polyhedra, loadfile="none", max_time=7):
+    def __init__(self, polyhedra, loadfile="none", max_time=15):
         self.ticks = []
         for i in range(len(polyhedra.vertices)):
             new_tick = Tick(polyhedra, i, max_time)
@@ -73,4 +74,5 @@ class WaveSim:
 
 
 sim = WaveSim(Polyhedra("true_pyramid_determined.txt"))
+print(sim.ticks[0].states)
 print(sim.ticks[0].unique_states)
