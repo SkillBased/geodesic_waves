@@ -7,6 +7,7 @@ class PlanarPoint:
         self.y = point_y
         self.pid = point_id
         self.visible = True
+        self.duplicate = False
 
     def DistanceToPoint(self, other):
         coords = [self.x, self.y]
@@ -101,7 +102,12 @@ class Unfolder:
                 right_dist = new_point.DistanceViaSegment(origin_point, anchor_2)
                 if (left_dist * right_dist < 0):
                     distance = origin_point.DistanceToPoint(new_point)
-                    self.invocations.append([distance, new_point.pid])
+                    for inv in self.invocations:
+                        if (abs(inv[0] - distance) < EPS and inv[1] == new_point.pid):
+                            new_point.duplicate = True
+                            break
+                    else:
+                        self.invocations.append([distance, new_point.pid])
                 else:
                     new_point.visible = False
             else:
@@ -121,6 +127,7 @@ class Unfolder:
                 dist = face.distances[origin_id][other_id]
                 other_point = PlanarPoint(other_id, dist, 0)
                 res_faces.append([face, origin_point, other_point])
+                break
         return res_faces
 
     def TraverseStep(self, anchors, cur_face, unfolds):
@@ -138,7 +145,7 @@ class Unfolder:
             a = this_iteration_points[i - 1]
             b = this_iteration_points[i]
             if (anchors != -1):
-                if ((a.pid in anchors[:2]) and (a.pid in anchors[:2])):
+                if ((a.pid in anchors[:2]) and (b.pid in anchors[:2])):
                     continue
             if (a.visible or b.visible):
                 if (anchor_ref * origin_point.DistanceViaSegment(a, b) < 0):
@@ -148,8 +155,8 @@ class Unfolder:
                         continue
                     anchor_dist = origin_point.DistanceViaSegment(b, a)
                     self.MapFace(face, a, b, ref)
-                    self.TraverseStep([a, b, anchor_dist], face, unfolds + 1)
-        return 0
+                    self.TraverseStep([a.pid, b.pid, anchor_dist], face, unfolds + 1)
+        return
 
     def CompressResults(self):
         compressed_results = []
@@ -174,5 +181,6 @@ class Unfolder:
         reference = PlanarPoint(-1, -1, -1)
         for start_face, a, b in start_faces:
             self.MapFace(start_face, a, b, reference)
+            self.invocations.append([b.DistanceToPoint(a), b.pid])
             self.TraverseStep(-1, start_face, 0)
             self.CompressResults()
