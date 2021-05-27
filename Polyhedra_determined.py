@@ -3,7 +3,7 @@ import math
 # this code is designed for convex polyhedra and will likely fail when a non-convex one is provided
 # program supports figures of any dimensions, however designed to work for 3D objects
 
-EPS = 0.000000001
+EPS = 0.001
 
 
 def DistBetween(a, b):
@@ -63,15 +63,12 @@ class Face:
 class Polyhedra:
     def __init__(self, filename="none"):
         self.vertices = []     # a list of tuples for each point
-        self.edges = []        # a list of vertice edges
-        # for larger scales scipy.sparse should be used
         self.faces = []        # a list of Face objects
         self.all_faces = []   # a list of Face objects that are fake faces
         construction_failed = self.ReadData(filename)
         if (construction_failed):
             print("Construction failed on read")
             self.vertices = []
-            self.edges = []
             self.faces = []
             return
         print("Polyhedra construction completed; Faces:", len(self.faces), "Vertices:", len(self.vertices))
@@ -91,7 +88,6 @@ class Polyhedra:
                 except Exception:
                     print("Initialisation failed, bad coords format")
                     return 1
-            self.edges = [[] for i in range(n)]
             m = int(input("Enter faces number: "))
             print("Enter", m, "sets of integers, vertices are numbered from 1")
             for i in range(m):
@@ -117,7 +113,6 @@ class Polyhedra:
                 except Exception:
                     print("Initialisation failed, bad coords format")
                     return 1
-            self.edges = [[] for i in range(n)]
             m = int(infile.readline())
             for i in range(m):
                 try:
