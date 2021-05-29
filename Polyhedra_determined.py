@@ -3,8 +3,8 @@ import math
 # this code is designed for convex polyhedra and will likely fail when a non-convex one is provided
 # program supports figures of any dimensions, however designed to work for 3D objects
 
+MEPS = 0.000001
 EPS = 0.001
-
 
 def DistBetween(a, b):
     n = len(a)
